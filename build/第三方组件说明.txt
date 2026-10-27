@@ -1,19 +1,20 @@
-第三方组件
+发票报销助手：第三方组件摘要
 
-@gutenye/ocr-node 与 @gutenye/ocr-models：MIT，https://github.com/gutenye/ocr
-模型为 PP-OCRv4，源自 PaddleOCR，模型上游采用 Apache-2.0，https://github.com/PaddlePaddle/PaddleOCR
-ONNX Runtime：MIT，https://github.com/microsoft/onnxruntime
-PDF.js：Apache-2.0，https://github.com/mozilla/pdf.js
-pdf-lib：MIT，https://github.com/Hopding/pdf-lib
-@napi-rs/canvas：MIT，https://github.com/Brooooooklyn/canvas
-Electron：MIT，https://github.com/electron/electron
-Sharp：Apache-2.0，https://github.com/lovell/sharp
-其他依赖的 LICENSE/NOTICE 文件保留在打包资源的 node_modules 内。
-本项目未捆绑 SumatraPDF，不依赖其打印程序。离线 OCR 和发票识别不会把材料上传到外部服务。
+本项目原创代码、文档及标志为 MIT。完整说明见 THIRD_PARTY_NOTICES.md。
+第三方组件不统一采用 MIT，实际条款见 third-party-licenses/ 中的许可与声明。
 
-Visual C++ 2022 x64 CRT：来自已安装的 Visual Studio 2022 Build Tools 14.44.35112 的 VC/Redist/MSVC 目录，采用应用本地部署；MSVCP140、MSVCP140_1、VCRUNTIME140 和 VCRUNTIME140_1。
-Microsoft 部署文档：https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-170
-模型上游 Apache-2.0 许可证全文随软件附带于 Apache-2.0.txt。
+Electron：MIT；Chromium 及其依赖有其他条款，随包保留 LICENSES.chromium.html。
+PDF.js：Apache-2.0；pdf-lib：MIT。
+Guten OCR 代码：MIT。PP-OCRv4 模型与字典源自 PaddleOCR，为 Apache-2.0，不适用代码 MIT。全文见 Apache-2.0.txt。
+ONNX Runtime：MIT 及其第三方声明。
+Sharp：Apache-2.0。Windows 原生包包含 libvips 及 LGPL-3.0-or-later 等依赖，原始 README、版本和许可保留在第三方目录。
+Noto Sans CJK SC：SIL Open Font License 1.1，全文随字体和第三方目录附带。
+Microsoft Visual C++ x64 CRT：遵循微软许可和再分发条件，不属于项目 MIT。详见 Microsoft 官方部署说明。
 
-Noto Sans CJK SC：SIL Open Font License 1.1。用于缺少票据字体时的中文后备字体，许可证随 fonts/OFL.txt 一并附带。
-字体上游：https://github.com/notofonts/noto-cjk
+https://github.com/gutenye/ocr#license
+https://github.com/PaddlePaddle/PaddleOCR
+https://github.com/lovell/sharp-libvips
+https://github.com/notofonts/noto-cjk
+https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files?view=msvc-170
+
+源码、修改和二次分发请保留适用的版权、许可、第三方声明和对应源码义务。

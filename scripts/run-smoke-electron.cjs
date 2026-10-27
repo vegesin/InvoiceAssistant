@@ -71,7 +71,9 @@ async function launch(executable,dataRoot,development){
   await app.waitFor('document.querySelector("h1")?.textContent==="发票报销助手"&&!!document.querySelector(".import-strip")');
   await app.run('window.__errors=[];window.addEventListener("error",e=>window.__errors.push(e.message));window.addEventListener("unhandledrejection",e=>window.__errors.push(String(e.reason)))');
   assert.equal(await app.run('document.querySelectorAll("nav button").length'),2);assert.equal((await app.run('window.api.listAccounts()')).length,0);
-  assert.equal((await app.run('window.api.getAppInfo()')).packaged,packaged);
+  const appInfo=await app.run('window.api.getAppInfo()');assert.equal(appInfo.packaged,packaged);assert.equal(appInfo.version,require('../package.json').version);
+  assert.ok(await app.run('document.querySelector(".brand-mark").complete&&document.querySelector(".brand-mark").naturalWidth>0'));
+  assert.equal(await app.run('Array.from(document.querySelectorAll("button")).filter(b=>b.textContent==="使用帮助").length'),1);
   const invoices=await app.run('window.api.importInvoices('+JSON.stringify(input.invoices)+')');assert.deepEqual(invoices.map(i=>i.amount),[10,20,30]);assert.ok(invoices.every(i=>i.thumbnail_path));
   await app.waitFor('document.querySelectorAll(".invoice-card").length===3');
   await app.click('选中当前可打印的未打印发票');
@@ -115,7 +117,7 @@ async function launch(executable,dataRoot,development){
   assert.equal((await app.run('window.api.listDaily()'))[0].total,18.5);
   assert.ok((await app.run('window.api.importScreenshots('+JSON.stringify(input.payments)+',"payment")')).every(s=>s.duplicate));
   assert.deepEqual(await app.run('window.__errors'),[]);
-  fs.writeFileSync(path.join(qa,packaged?'packaged-smoke-result.json':'desktop-smoke-result.json'),JSON.stringify({passed:true,version:'0.4.0',packaged,executable,dataRoot,batchId,wordPath:printed.word_path,pdfPath:printed.pdf_path,tasks:7,invoiceOnly:true,cardFileDrop:true,galleryFileDrop:true,ocr:true,externalFileDrop:true,thumbnailDragPair:true,simplex:true},null,2));
+  fs.writeFileSync(path.join(qa,packaged?'packaged-smoke-result.json':'desktop-smoke-result.json'),JSON.stringify({passed:true,version:require('../package.json').version,packaged,executable,dataRoot,batchId,wordPath:printed.word_path,pdfPath:printed.pdf_path,tasks:7,invoiceOnly:true,cardFileDrop:true,galleryFileDrop:true,ocr:true,externalFileDrop:true,thumbnailDragPair:true,simplex:true},null,2));
   console.log('PASS: 两个选项卡、内置OCR、真实文件拖入、截图拖动关联、日期配置、N+1单面打印任务、日常开销合计');
  }catch(error){try{console.error('界面状态：',await app.run('document.body.textContent.slice(-1800)'));await app.capture(path.join(qa,'smoke-failure.png'));}catch(_){}throw error;}finally{await app.close();}
  app=await launch(executable,dataRoot,!packaged);

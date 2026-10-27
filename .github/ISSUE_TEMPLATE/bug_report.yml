@@ -1,0 +1,31 @@
+name: 问题反馈
+description: 报告可复现的问题，请勿提交个人资料或凭据。
+body:
+  - type: markdown
+    attributes:
+      value: 请先查阅 docs/FAQ.md。不要上传真实票据、授权码、密钥、数据库或私人配置；安全问题按 SECURITY.md 私下反馈。
+  - type: input
+    id: version
+    attributes:
+      label: 软件版本与 Windows 版本
+      placeholder: 例如 0.4.1 / Windows 11 x64 / 便携版
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 按操作顺序描述；邮箱问题只写服务商及日期范围，不填真实地址。
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 预期结果与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: 合成样本或已脱敏的补充信息
+      description: 打印问题可提供打印模式、任务状态和驱动类型。PDF 文本层、二维码与元数据也须脱敏。

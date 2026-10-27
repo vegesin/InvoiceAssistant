@@ -1,0 +1,12 @@
+License texts copied without modification from SPDX license-list-data:
+https://github.com/spdx/license-list-data/tree/main/text
+
+LGPL-3.0-or-later, GPL-3.0-or-later and MPL-2.0 apply only to relevant third-party components, not to the original application code.
+
+Additional upstream notices (unmodified):
+ONNXRuntime-LICENSE.txt
+https://raw.githubusercontent.com/microsoft/onnxruntime/v1.22.0/LICENSE
+ONNXRuntime-ThirdPartyNotices.txt
+https://raw.githubusercontent.com/microsoft/onnxruntime/v1.22.0/ThirdPartyNotices.txt
+GutenOCR-LICENSE.txt
+https://raw.githubusercontent.com/gutenye/ocr/main/LICENSE

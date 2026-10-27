@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('api', {
   setSettings: (patch) => ipcRenderer.invoke('settings:set', patch),
   getDirs: () => ipcRenderer.invoke('app:dirs'),
   getAppInfo: () => ipcRenderer.invoke('app:info'),
+  openHelp: () => ipcRenderer.invoke('app:help'),
   openDir: (dir) => ipcRenderer.invoke('app:openDir', dir),
 
   // 邮箱

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none" role="img" aria-labelledby="title">
+  <title id="title">发票报销助手：发票与核对标记</title>
+  <defs><linearGradient id="tile" x1="128" y1="64" x2="896" y2="1024" gradientUnits="userSpaceOnUse"><stop stop-color="#1B8078"/><stop offset="1" stop-color="#105752"/></linearGradient></defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#tile)"/>
+  <rect x="604" y="262" width="188" height="420" rx="42" fill="#9DD4C8" fill-opacity=".16" stroke="#B5E4D8" stroke-opacity=".65" stroke-width="18"/>
+  <path d="M667 308h62M678 637h41" stroke="#B5E4D8" stroke-width="14" stroke-linecap="round"/>
+  <path d="M254 166h328l108 108v505l-44-28-45 28-44-28-45 28-44-28-45 28-44-28-45 28-42-28-38 28V166Z" fill="#FFFDF8"/>
+  <path d="M582 166v108h108L582 166Z" fill="#C5E7DB"/>
+  <rect x="326" y="320" width="156" height="36" rx="18" fill="#176D69"/>
+  <path d="M326 421h276M326 500h215M326 579h158" stroke="#88B9AE" stroke-width="23" stroke-linecap="round"/>
+  <circle cx="698" cy="733" r="145" fill="#105752"/>
+  <circle cx="698" cy="733" r="119" fill="#D3EEDF"/>
+  <path d="m642 732 39 40 78-88" stroke="#176D69" stroke-width="29" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

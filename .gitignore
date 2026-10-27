@@ -8,3 +8,14 @@ release/
 *.private.json
 desktop.ini
 .private-backups/
+
+# 本地业务资料、凭据和数据库（已被跟踪的文件仍需单独检查）
+报销资料/
+.key
+app.db
+app.db-*
+accounts.json
+.env
+.env.*
+!.env.example
+!.env.*.example

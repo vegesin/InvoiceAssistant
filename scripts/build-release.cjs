@@ -9,6 +9,8 @@ function run(script,args){
   if(result.error)throw result.error;
   if(result.status!==0)process.exit(result.status||1);
 }
+run(path.join(root,'scripts/generate-brand.cjs'),[]);
+run(path.join(root,'scripts/build-docs.cjs'),[]);
 run(path.join(root,'node_modules/vite/bin/vite.js'),['build']);
 const config=require('../electron-builder.config.cjs');
 const staging=path.join(root,'.qa','build-'+Date.now());
@@ -21,7 +23,10 @@ const release=path.join(root,'release');
 fs.mkdirSync(release,{recursive:true});
 const artifacts=fs.readdirSync(staging).filter(file=>/\.exe(?:\.blockmap)?$/.test(file));
 for(const file of artifacts)fs.copyFileSync(path.join(staging,file),path.join(release,file));
-fs.copyFileSync(path.join(root,'build/使用说明.txt'),path.join(release,'使用说明.txt'));
+for(const name of ['使用说明.txt','使用手册.html','第三方组件说明.txt','Apache-2.0.txt'])fs.copyFileSync(path.join(root,'build',name),path.join(release,name));
+for(const name of ['LICENSE','THIRD_PARTY_NOTICES.md'])fs.copyFileSync(path.join(root,name),path.join(release,name));
+function copyTree(from,to){fs.mkdirSync(to,{recursive:true});for(const item of fs.readdirSync(from,{withFileTypes:true})){const source=path.join(from,item.name),destination=path.join(to,item.name);if(item.isDirectory())copyTree(source,destination);else fs.copyFileSync(source,destination);}}
+copyTree(path.join(staging,'win-unpacked','third-party-licenses'),path.join(release,'third-party-licenses'));
 const hashes=artifacts.filter(file=>file.endsWith('.exe')).map(file=>crypto.createHash('sha256').update(fs.readFileSync(path.join(release,file))).digest('hex')+'  '+file);
 if(hashes.length)fs.writeFileSync(path.join(release,'SHA256SUMS.txt'),hashes.join('\n')+'\n');
 fs.writeFileSync(path.join(root,'.qa/latest-build.json'),JSON.stringify({staging,executable:path.join(staging,'win-unpacked','InvoiceAssistant.exe'),artifacts:artifacts.map(file=>path.join(release,file))},null,2));

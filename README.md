@@ -1,88 +1,103 @@
-# 发票报销助手 v0.4.0
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand/wordmark-dark.png">
+    <img src="assets/brand/wordmark.png" width="680" alt="发票报销助手 / Invoice Reimbursement Assistant">
+  </picture>
+</p>
 
-Windows 10/11 x64 便携桌面工具。围绕两件事：把发票与实际付款截图配齐后一次打印；单独核算日常开销。
+<p align="center">把材料配齐，一次打印。</p>
+<p align="center">Windows 10/11 x64 · 免安装便携版 · 本地中文 OCR · MIT</p>
+<p align="center"><a href="README.en.md">English</a> · <a href="docs/USER_GUIDE.md">使用手册</a> · <a href="docs/DEVELOPMENT.md">开发指南</a> · <a href="docs/FAQ.md">常见问题</a></p>
 
-## 便携版
+# 发票报销助手
 
-运行 `release/InvoiceAssistant-0.4.0-x64-Portable.exe`。本次只构建便携版本，无安装程序。
-新用户默认使用 EXE 同级的“报销资料”，设置可迁移；已有用户继续沿用当前资料位置和邮箱配置。分发只需 EXE 和使用说明，不要复制个人资料库。
-内置 PDF.js、中文 PP-OCRv4 模型和 ONNX Runtime，无需安装 Node、Python、OCR、Word 或 PDF 打印插件。
+面向个人的 Windows 报销材料整理工具：收取邮箱发票，导入手机实际付款截图，看图核对后批量单面打印；日常账单另页核算。
 
-## 使用
+你只需关注两个选项卡：**发票报销**和**日常开销**。邮箱、日期范围、资料目录和排版设置集中在“设置”中。
 
-1. 在“发票报销”批量导入 PDF/OFD、付款截图，支持系统文件拖放及粘贴图片；也可从配置的邮箱收取。
-2. 卡片显示日期、商户、金额和两份材料预览，按开票日期从新到旧。点击图片核对并修改识别字段。
-3. 将右侧付款截图拖到发票卡片，或查看金额、商户、日期推荐后确认关联。同金额有多笔时保留歧义。
-4. 选中发票、选打印模式和打印机。“仅打印发票”无需配对或识别金额，提交 N 个单面 PDF 任务；“发票＋付款记录”提交 N+1 个单面任务。
-5. “打印记录”可打开付款 Word、查看每项进度、续打未提交任务。状态不确定时先查看系统队列。
-6. 日常账单或长截图在“日常开销”处理，支出减退款、收入排除；核对可编辑明细后保存合计，不进入付款 Word。
+![发票报销界面，示例材料均为合成数据](docs/images/invoices.png)
 
-付款 Word 为 A4 横向，每页 2 或 3 张标准手机截图，完整等比例缩放。软件同时生成相同纸张和缩放尺寸的付款 PDF，由内置打印管线提交；无需用 Office 打印 Word。
-N+1 指任务数，付款记录可有多页，原始发票也可能有多页。“已提交”表示 Windows 接收了任务，实际出纸仍需确认。
+## 下载与开始使用
 
-## 邮箱日期配置
+到本仓库的 **Releases** 下载 `InvoiceAssistant-<版本>-x64-Portable.exe`。源码下载包不包含 EXE；尚无发布包时，可按[开发指南](docs/DEVELOPMENT.md)自行构建。
 
-`config/settings.json` 保存：
+1. 将 EXE 放到可写目录，建议使用 D 盘，直接双击运行。
+2. 首次默认在 EXE 同级创建“报销资料”。已有用户沿用原资料目录和邮箱设置。
+3. 拖入发票 PDF/OFD/ZIP 与手机截图，或在设置中添加邮箱后收取发票。
+4. 核对图片、金额与配对关系，选择打印模式和打印机，再打印。
 
-```json
-{
-  "firstLaunchDate": "2026-10-27",
-  "mailReceivedFrom": "2026-10-27",
-  "mailReceivedTo": null,
-  "autoFetchWhenOpen": true,
-  "wordPerPage": 3
-}
+无需另装 Node.js、Python、OCR、Word 或 PDF 打印插件。使用真实打印机需要该设备的 Windows 驱动。
+
+## 能做什么
+
+| 场景 | 当前支持 |
+| --- | --- |
+| 收取发票 | IMAP 收件箱、接收日期范围、运行期间每 5 分钟检查；支持 ZIP 中的 PDF/OFD |
+| 识别与整理 | PDF 正文＋离线中文 OCR，按日期从新到旧；同票号 PDF/OFD 归并，字段可人工修正 |
+| 关联付款 | 图片批量导入、粘贴、拖入卡片；按金额、商户和日期推荐，用户看图确认 |
+| 仅打印发票 | 无需配对或识别金额，N 张 PDF 提交 N 个单面任务 |
+| 发票＋付款记录 | 完整配对后，N 个发票任务＋1 个合并付款记录任务；生成 A4 横向 Word 与打印 PDF |
+| 日常开销 | 账单／长截图明细核对，支出减退款，收入不计入，保存核算结果 |
+| 本地资料 | 自选目录、复制校验迁移、独立邮箱配置、逐任务打印进度和失败续打 |
+
+**N+1 是任务数，不是纸张数。** 多页 PDF 和付款记录都可能占多张纸。“已提交”表示 Windows 已接收请求，仍需确认实际出纸。
+
+## 一条最短工作流
+
+```text
+邮箱／本地发票 ──┐
+                ├─ 看图核对、关联 ─ 选择打印模式和打印机 ─ 单面打印
+手机付款截图 ───┘
+
+日常账单／长截图 ─ 核对交易明细 ─ 保存本次合计
 ```
 
-首次默认从首次启动日持续收取。日期是邮件收到的日期，首尾当天包含；结束日期留空表示之后持续收取。
-修改日期后重新收取会补扫范围并按内容去重，不会因旧 UID 游标漏掉历史邮件。软件打开期间每 5 分钟检查邮箱，退出后停止。
-PDF 优先读正文，扫描图再本地 OCR；OFD 解析文字内容。同一票号的 PDF/OFD 归为一张，保留格式原件。支持 ZIP 邮件附件并在升级后按现有日期自动补扫；OFD 文字按模板和坐标重组，航空金额取合计，填开日期与行程日期区分。用车行程附件不另算发票。
+具体操作、邮箱设置、资料迁移、升级及打印异常处理见[使用手册](docs/USER_GUIDE.md)。
 
-## 文件位置和隐私
+## 资料与隐私
 
-EXE 旁的 `InvoiceAssistant.private.json` 记录资料位置与首次启动日。所选资料目录内：
+- 发票、截图、OCR 文本和数据库保存在本地资料目录。应用未实现发票云上传或应用遥测。
+- 收取邮件时连接你配置的邮箱服务器；不读取微信聊天数据库。
+- 邮箱及加密授权码保存在 `config/accounts.private.json`，本地密钥为 `config/.key`。
+- EXE 旁的 `InvoiceAssistant.private.json` 记录资料位置。它与资料目录需要在升级时保留，不能随公共发布包分发。
+- `.gitignore` 排除运行资料、私人配置、密钥、数据库、备份和测试输出。已跟踪文件不受新增忽略规则保护，公开前仍需检查 Git 历史。
 
-| 位置 | 内容 |
-| --- | --- |
-| config/settings.json | 日期筛选、排版设置 |
-| config/accounts.private.json 与 .key | 独立加密邮箱配置与本地密钥 |
-| db/app.db | 发票、关联、打印进度、核算记录 |
-| inbox/月份/ | 发票原件，以日期、商户、金额命名；原始文件名保留在记录内 |
-| screenshots/originals/ | 实际付款截图 |
-| expenses/ | 日常开销图片 |
-| incoming/ | 可选图片接收目录，放入后自动导入 |
-| export/批次编号/ | 付款 Word、付款打印 PDF |
-| temp/ | 缩略图、邮件暂存、运行缓存 |
+详见[隐私与资料管理](docs/PRIVACY.md)和[安全问题反馈](SECURITY.md)。
 
-不再默认将业务数据写入 C 盘 AppData。启动时发现旧版资料可选择复制迁移，逐文件校验并改写数据库路径，旧目录保留。
-设置也可迁移到新的空目录并重启。备份需退出程序后备份整个资料目录，包含配置和密钥。
+## 适用范围
 
-微信 PC 登录不授予聊天读取权限。本工具不读取微信数据库；先把文件传输助手的图片保存后拖入，或复制后粘贴。本地识别不上传发票和截图。
+当前仅提供 Windows 10/11 x64 便携版。一张发票对应一张实际付款截图；多笔付款或多张发票共用一笔付款需先人工整理凭证。只有 OFD 时可保存和解析文字，预览及批量打印需要对应 PDF。仅提供网页下载链接的邮件需先手动下载附件再导入。
 
-## 开发与验证
+OCR 和匹配推荐均需要核对。日常开销长截图不进入付款 Word。当前不提供手机端、微信自动读取、云端同步或完整企业财务审批流程。
+
+## 从源码运行
+
+建议使用 Windows x64 与 Node.js 22 或 24。
 
 ```powershell
-npm install
+$env:ONNXRUNTIME_NODE_INSTALL_CUDA='skip'
+npm ci
+npm run docs
 npm run build
 npm start
-npm test
-npm run test:desktop
-npm run dist
-node scripts/verify-release.cjs
-npm run test:packaged
 ```
 
-`npm run dist` 只生成 Portable.exe；`npm run pack` 生成可运行程序目录。构建缓存和 QA 资料在 `.qa/`，私人配置、数据库、测试材料不打包。
-生产依赖和模型版本锁定；`build/vc-runtime/` 附带来自 Visual Studio Redistributable 目录的 x64 CRT。第三方说明及 Apache-2.0 全文在 build/。
-测试使用合成材料和隔离数据库，不连接真实邮箱、不实际出纸。`INVOICE_PRINT_TEST=1` 只在显式指定 `.qa/` 隔离资料库时生效。
-`INVOICE_SMOKE_RESTRICTED=1` 只为测试启用软件渲染和 no-sandbox；正常应用保留 sandbox。
-可用 `INVOICE_TEST_EXE` 指向便携 EXE，`INVOICE_TEST_TEMP` 指定受限环境中的便携解压临时目录。
+开发、隔离测试和便携版构建见[开发指南](docs/DEVELOPMENT.md)；维护者发布流程见[发布指南](docs/RELEASING.md)。不要使用真实邮箱或真实打印机运行自动化测试。
 
-## 当前边界
+## 文档导航
 
-OCR 结果需要核对；多金额、缺失字段和歧义配对不会当作确定结果。当前一张发票对应一张实际付款截图。
-只有 OFD 时可保留识别，批量打印需补充对应 PDF。旧版报销记录继续保存在数据库中，新界面不再要求创建报销单或填写补贴。
-便携 EXE 未作商业代码签名。
+| 读者／任务 | 文档 |
+| --- | --- |
+| 第一次使用、邮箱、截图、打印 | [使用手册](docs/USER_GUIDE.md) |
+| 使用中遇到问题 | [常见问题](docs/FAQ.md) |
+| 备份、迁移、私人配置和网络行为 | [隐私与资料管理](docs/PRIVACY.md) |
+| 安装依赖、调试、测试、构建 | [开发指南](docs/DEVELOPMENT.md) |
+| 模块、数据流、数据库与 IPC | [架构说明](docs/ARCHITECTURE.md) |
+| 打包、审核、分发和清理 | [发布指南](docs/RELEASING.md) |
+| Logo、图标和配色 | [品牌资源](docs/BRANDING.md) |
+| 提交问题和代码 | [贡献指南](CONTRIBUTING.md) |
+| 版本变化 | [更新记录](CHANGELOG.md) |
 
-本轮修复覆盖真实航空 PDF 的矩阵和中文字体渲染、PDF/OFD 同票合并，以及铁路 ZIP 附件补收。系统文件可拖到卡片、截图区或页面空白处；没有本地路径的图片可按内容导入。
-清理后只保留最新便携 EXE、说明和校验值，当前机器的 InvoiceAssistant.private.json 与 .private-backups/ 配置备份保留。升级请保持 EXE 与现有定位文件在同一目录。
+## 许可证
+
+本项目原创代码、文档和原创品牌资源采用 [MIT License](LICENSE)。第三方库、OCR 模型、字体和运行库遵循各自许可，详见[第三方声明](THIRD_PARTY_NOTICES.md)。项目使用的许可证不改变第三方资源的许可范围。

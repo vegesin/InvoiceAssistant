@@ -1,11 +1,11 @@
-param([switch]$Apply)
+﻿param([switch]$Apply)
 $ErrorActionPreference='Stop'
 $taskRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')).TrimEnd('\','/')
 $taskRelease=Join-Path $taskRoot 'release'
 $taskQa=Join-Path $taskRoot '.qa'
-$taskVersion=(Get-Content -LiteralPath (Join-Path $taskRoot 'package.json') -Raw | ConvertFrom-Json).version
+$taskVersion=(Get-Content -Encoding UTF8 -LiteralPath (Join-Path $taskRoot 'package.json') -Raw | ConvertFrom-Json).version
 $taskPointer=Join-Path $taskRelease 'InvoiceAssistant.private.json'
-$taskData=(Get-Content -LiteralPath $taskPointer -Raw | ConvertFrom-Json).dataRoot
+$taskData=(Get-Content -Encoding UTF8 -LiteralPath $taskPointer -Raw | ConvertFrom-Json).dataRoot
 $taskProtected=@($taskRoot,(Join-Path $taskRoot '.git'),(Join-Path $taskRoot '.private-backups'),$taskPointer,(Join-Path $taskRelease ("InvoiceAssistant-"+$taskVersion+"-x64-Portable.exe")))
 if($taskData){$taskProtected+=[IO.Path]::GetFullPath($taskData)}
 function Test-TaskInside([string]$candidate,[string]$parent){$c=[IO.Path]::GetFullPath($candidate).TrimEnd('\','/');$p=[IO.Path]::GetFullPath($parent).TrimEnd('\','/');return $c.Equals($p,[StringComparison]::OrdinalIgnoreCase) -or $c.StartsWith($p+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)}
@@ -17,6 +17,7 @@ function Assert-TaskSafe([string]$candidate){
  if($item.Attributes -band [IO.FileAttributes]::ReparsePoint){throw ('拒绝清理链接目录：'+$full)}
  return $full
 }
+if($Apply){$taskAudit=Get-Content -Encoding UTF8 -LiteralPath (Join-Path $taskQa 'release-audit.json') -Raw | ConvertFrom-Json;if(-not $taskAudit.passed -or $taskAudit.version -ne $taskVersion){throw '请先验证当前版本再清理构建目录'}}
 $taskTargets=@()
 $taskKeepQa=@('latest-build.json','release-audit.json','packaged-smoke-result.json','desktop-smoke-result.json','real-validation.json','cleanup-report.json')
 foreach($e in Get-ChildItem -LiteralPath $taskQa -Force){if($e.Name -eq 'builder-cache'){continue};if(-not $e.PSIsContainer -and $e.Name -in $taskKeepQa){continue};$taskTargets+=$e.FullName}
@@ -34,5 +35,5 @@ foreach($target in @($taskTargets | Select-Object -Unique)){
  catch{$taskFailed+=[pscustomobject]@{Path=$full;Reason=$_.Exception.Message}}
 }
 $taskReport=[pscustomobject]@{Applied=[bool]$Apply;Targets=$taskTargets.Count;Deleted=$taskDeleted.Count;Bytes=$taskBytes;Failed=$taskFailed;DataRootPreserved=$taskData;PointerPreserved=(Test-Path -LiteralPath $taskPointer)}
-if($Apply){$taskManifest=Get-Content -LiteralPath (Join-Path $taskQa 'latest-build.json') -Raw | ConvertFrom-Json;$taskManifest.executable=Join-Path $taskRelease ("InvoiceAssistant-"+$taskVersion+"-x64-Portable.exe");$taskManifest | Add-Member -NotePropertyName cleaned -NotePropertyValue $true -Force;$taskManifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskQa 'latest-build.json') -Encoding UTF8;$taskReport | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $taskQa 'cleanup-report.json') -Encoding UTF8}
+if($Apply){$taskManifest=Get-Content -Encoding UTF8 -LiteralPath (Join-Path $taskQa 'latest-build.json') -Raw | ConvertFrom-Json;$taskManifest.executable=Join-Path $taskRelease ("InvoiceAssistant-"+$taskVersion+"-x64-Portable.exe");$taskManifest | Add-Member -NotePropertyName cleaned -NotePropertyValue $true -Force;[IO.File]::WriteAllText((Join-Path $taskQa 'latest-build.json'),($taskManifest | ConvertTo-Json -Depth 6),[Text.UTF8Encoding]::new($false));[IO.File]::WriteAllText((Join-Path $taskQa 'cleanup-report.json'),($taskReport | ConvertTo-Json -Depth 6),[Text.UTF8Encoding]::new($false))}
 $taskReport | ConvertTo-Json -Depth 6

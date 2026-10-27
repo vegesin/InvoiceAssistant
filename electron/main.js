@@ -11,7 +11,7 @@ let store,watcher,timer,quitting=false,mailBusy=false;
 const single=app.requestSingleInstanceLock();if(!single)app.quit();
 function notify(channel,payload){for(const win of BrowserWindow.getAllWindows())if(!win.isDestroyed())win.webContents.send(channel,payload);}
 function createWindow(){
-  const win=new BrowserWindow({width:1380,height:900,minWidth:1050,minHeight:720,backgroundColor:'#f4f6f8',webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,spellcheck:false}});
+  const win=new BrowserWindow({width:1380,height:900,minWidth:1050,minHeight:720,icon:path.join(__dirname,'../assets/brand/icon-256.png'),backgroundColor:'#f4f6f8',webPreferences:{preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true,spellcheck:false}});
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',(event,url)=>{if(url!==win.webContents.getURL())event.preventDefault();});
   if(process.argv.includes('--dev'))win.loadURL('http://localhost:5173');else win.loadFile(path.join(__dirname,'../dist/renderer/index.html'));

@@ -118,6 +118,11 @@ function registerIpc(ctx) {
   handle('archive:files',(title,files,sub)=>archive.archiveFiles(title,files,sub));
   handle('app:dirs',()=>store.dirs);
   handle('app:info',()=>({version:app.getVersion(),privateConfig:store.accounts.file,dataRoot:store.dirs.root,packaged:app.isPackaged}));
+  handle('app:help',async()=>{
+    const file=app.isPackaged?path.join(path.dirname(process.execPath),'使用手册.html'):path.join(__dirname,'../build/使用手册.html');
+    if(!fs.existsSync(file))throw new Error('使用手册缺失，源码运行请先执行 npm run docs');
+    const error=await shell.openPath(file);if(error)throw new Error(error);return true;
+  });
   handle('app:openDir',async directory=>{const error=await shell.openPath(directory);if(error)throw new Error(error);return true;});
   handle('mail:fetchAll',()=>ctx.fetchAll());
   handle('match:recommend',()=>{const all=materials.listMaterials(store);return require('./services/match/recommend').recommendations(all.invoices,all.screenshots);});
