@@ -1,0 +1,17 @@
+{
+  "说明": "配置结构示例。请在应用中添加邮箱，程序会在用户数据目录生成 accounts.private.json；不要在本示例填写真实授权码。",
+  "version": 1,
+  "next_id": 2,
+  "accounts": [
+    {
+      "id": 1,
+      "name": "我的邮箱",
+      "email": "your-name@example.com",
+      "imap_host": "imap.example.com",
+      "imap_port": 993,
+      "imap_secure": 1,
+      "enabled": 1,
+      "auth_token": "由应用加密生成，不填写明文"
+    }
+  ]
+}
