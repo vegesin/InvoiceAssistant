@@ -83,6 +83,7 @@ npm run test:desktop
 | `INVOICE_TEST_EXE` | 指定打包验证使用的 EXE 绝对路径 |
 | `INVOICE_TEST_TEMP` | 指定便携程序测试解压的临时目录 |
 | `INVOICE_SMOKE_RESTRICTED` | 受限桌面测试的渲染和 sandbox 参数 |
+| `INVOICE_SMOKE_CAPTURE` | 设为 `0` 跳过桌面截图，仅用于截图接口不可用的环境；仍检查业务操作 |
 | `INVOICE_PRINT_TEST` | 受隔离路径限制的模拟打印提交 |
 | `ONNXRUNTIME_NODE_INSTALL_CUDA` | 安装依赖时可设 `skip`，跳过 CUDA 组件 |
 

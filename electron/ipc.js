@@ -72,6 +72,8 @@ function registerIpc(ctx) {
     return {matched,hints:match.unmatchedHints(invoices,screenshots,matched)};
   });
   handle('material:list',()=>materials.listMaterials(store));
+  handle('invoice:delete',ids=>{const result=materials.deleteInvoices(store,ids);ctx.notify?.('app:progress',{phase:'发票已移入“已删除”'});return result;});
+  handle('invoice:restore',ids=>{const result=materials.restoreInvoices(store,ids);ctx.notify?.('app:progress',{phase:'发票已恢复，请重新核对付款关联'});return result;});
   handle('material:update',(type,id,patch)=>{const r=materials.updateMaterial(store,type,id,patch);ctx.notify?.('app:progress',{phase:'材料已更新'});return r;});
   handle('material:bind',(invoiceId,screenshotId)=>materials.bindPayment(store,invoiceId,screenshotId));
   handle('material:preview',(type,id)=>materials.preview(store,type,id));
@@ -117,7 +119,7 @@ function registerIpc(ctx) {
   handle('report:export',(id,perPage)=>reports.exportPackage(store,id,perPage||store.getSettings().wordPerPage));
   handle('archive:files',(title,files,sub)=>archive.archiveFiles(title,files,sub));
   handle('app:dirs',()=>store.dirs);
-  handle('app:info',()=>({version:app.getVersion(),privateConfig:store.accounts.file,dataRoot:store.dirs.root,packaged:app.isPackaged}));
+  handle('app:info',()=>({version:app.getVersion(),privateConfig:store.accounts.file,dataRoot:store.dirs.root,dataLocation:require('./store/paths').storedDataRoot(store.dirs.root),packaged:app.isPackaged}));
   handle('app:help',async()=>{
     const file=app.isPackaged?path.join(path.dirname(process.execPath),'使用手册.html'):path.join(__dirname,'../build/使用手册.html');
     if(!fs.existsSync(file))throw new Error('使用手册缺失，源码运行请先执行 npm run docs');
@@ -170,7 +172,7 @@ function registerIpc(ctx) {
     if(activeImports||!ctx.canRelocate())throw new Error('请等待导入、邮箱同步和打印结束');
     const picked=await dialog.showOpenDialog({title:'选择新的空资料目录',properties:['openDirectory','createDirectory']});if(picked.canceled)return false;
     const dest=picked.filePaths[0];store.persist();require('./store/storage').copyVerified(store.dirs.root,dest);
-    require('./store/private-config').writeJson(require('./store/paths').PREFERENCE_FILE,{dataRoot:dest,firstLaunchDate:store.getSettings().firstLaunchDate});
+    const location=require('./store/paths');require('./store/private-config').writeJson(location.PREFERENCE_FILE,{dataRoot:location.storedDataRoot(dest),firstLaunchDate:store.getSettings().firstLaunchDate});
     await ctx.closeWatcher();app.relaunch();app.quit();return true;
   });
 }

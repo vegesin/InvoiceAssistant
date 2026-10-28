@@ -11,6 +11,7 @@ desktop.ini
 
 # 本地业务资料、凭据和数据库（已被跟踪的文件仍需单独检查）
 报销资料/
+InvoiceData/
 .key
 app.db
 app.db-*

@@ -6,6 +6,7 @@ $taskQa=Join-Path $taskRoot '.qa'
 $taskVersion=(Get-Content -Encoding UTF8 -LiteralPath (Join-Path $taskRoot 'package.json') -Raw | ConvertFrom-Json).version
 $taskPointer=Join-Path $taskRelease 'InvoiceAssistant.private.json'
 $taskData=(Get-Content -Encoding UTF8 -LiteralPath $taskPointer -Raw | ConvertFrom-Json).dataRoot
+if($taskData -and -not [IO.Path]::IsPathRooted($taskData)){$taskData=Join-Path $taskRelease $taskData}
 $taskProtected=@($taskRoot,(Join-Path $taskRoot '.git'),(Join-Path $taskRoot '.private-backups'),$taskPointer,(Join-Path $taskRelease ("InvoiceAssistant-"+$taskVersion+"-x64-Portable.exe")))
 if($taskData){$taskProtected+=[IO.Path]::GetFullPath($taskData)}
 function Test-TaskInside([string]$candidate,[string]$parent){$c=[IO.Path]::GetFullPath($candidate).TrimEnd('\','/');$p=[IO.Path]::GetFullPath($parent).TrimEnd('\','/');return $c.Equals($p,[StringComparison]::OrdinalIgnoreCase) -or $c.StartsWith($p+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase)}

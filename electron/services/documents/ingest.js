@@ -106,7 +106,7 @@ async function reanalyze(store,ocr,onProgress){
       result.thumbnail_path=await thumbnail(store,result.thumbnail,row.content_hash||String(row.id));
       require('../materials').assertEditable(store,'invoice',row.id);
       writeAnalysis(store,row.id,result);
-      const same=result.identity_key&&store.db.prepare('SELECT * FROM invoices WHERE identity_key=? AND document_kind=? AND id<>? AND duplicate_of IS NULL ORDER BY id').get(result.identity_key,result.document_kind,row.id);
+      const same=result.identity_key&&store.db.prepare('SELECT * FROM invoices WHERE identity_key=? AND document_kind=? AND id<>? AND duplicate_of IS NULL AND deleted_at IS NULL ORDER BY id').get(result.identity_key,result.document_kind,row.id);
       if(same){
         const pairs=store.db.prepare('SELECT * FROM invoice_payments WHERE invoice_id IN (?,?)').all(row.id,same.id);
         if(pairs.length<=1){

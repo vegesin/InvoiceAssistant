@@ -10,7 +10,7 @@ for(const line of sums){const [expected,name]=line.split('  '),bytes=fs.readFile
 const auditFile=path.join(qa,'release-audit.json');
 if(build.cleaned){const audit=JSON.parse(fs.readFileSync(auditFile,'utf8'));assert.ok(audit.passed);assert.equal(audit.inputDigest,inputDigest,'源码或构建资源已改变，请重新构建');assert.deepEqual(audit.artifactHashes,artifacts);console.log(JSON.stringify({...audit,publishedChecksumVerified:true,stagingRemoved:true},null,2));process.exit(0);}
 const archive=path.join(path.dirname(build.executable),'resources/app.asar'),names=asar.listPackage(archive).map(n=>n.replace(/\\/g,'/'));
-const forbidden=names.filter(n=>/^\/(?:data|报销资料|\.qa|\.private-backups|tests|scripts|release)(?:\/|$)/.test(n)||/(?:\.private\.json|\/\.key|\/app\.db(?:-[^/]*)?)$/.test(n));assert.deepEqual(forbidden,[]);
+const forbidden=names.filter(n=>/^\/(?:InvoiceData|data|报销资料|\.qa|\.private-backups|tests|scripts|release)(?:\/|$)/.test(n)||/(?:\.private\.json|\/\.key|\/app\.db(?:-[^/]*)?)$/.test(n));assert.deepEqual(forbidden,[]);
 assert.equal(JSON.parse(asar.extractFile(archive,'package.json')).version,require('../package.json').version);const sources=inputs.filter(f=>f.startsWith(path.join(root,'electron')+path.sep)&&f.endsWith('.js'));
 for(const f of sources)assert.deepEqual(asar.extractFile(archive,path.relative(root,f)),fs.readFileSync(f));
 let rendererFilesVerified=0;

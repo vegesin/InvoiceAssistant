@@ -80,6 +80,7 @@ async function fetchInvoices(account, store, hooks = {}, deps = {}) {
             let record;
             try{record=await ingest(store,saved.filePath,deps.ocr||hooks.ocr,{account_id:account.id,mail_uid:uid,mail_received_at:received?new Date(received).toISOString():null});}
             finally{if(fsExists(saved.filePath))require('fs').unlinkSync(saved.filePath);}
+            if(record.deleted_at){skipped++;continue;}
             const {id,amount,invoice_type:invoiceType}=record;
             downloaded++;
             if (hooks.onInvoice) hooks.onInvoice({ id, accountId: account.id, mailUid: uid, filePath: record.file_path, amount, invoiceType });

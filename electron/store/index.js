@@ -171,7 +171,7 @@ class Store {
     for(const [name,type] of [
       ['mail_received_at','TEXT'],['raw_text','TEXT'],['recognition_state',"TEXT DEFAULT 'pending'"],['recognition_source','TEXT'],
       ['analysis_version','TEXT'],['document_kind',"TEXT DEFAULT 'invoice'"],['identity_key','TEXT'],['duplicate_of','INTEGER'],
-      ['thumbnail_path','TEXT'],['printed_at','TEXT'],['notice','TEXT'],['manual_fields',"TEXT DEFAULT '[]'"]
+      ['thumbnail_path','TEXT'],['printed_at','TEXT'],['deleted_at','TEXT'],['notice','TEXT'],['manual_fields',"TEXT DEFAULT '[]'"]
     ])this._addColumn('invoices',name,type);
     for(const [name,type] of [
       ['recognition_state',"TEXT DEFAULT 'pending'"],['recognition_source','TEXT'],['payment_state',"TEXT DEFAULT 'ok'"],
@@ -181,7 +181,7 @@ class Store {
     this.db.exec("CREATE TABLE IF NOT EXISTS invoice_variants (id INTEGER PRIMARY KEY AUTOINCREMENT,invoice_id INTEGER NOT NULL,file_path TEXT NOT NULL,file_name TEXT,format TEXT,content_hash TEXT UNIQUE,document_kind TEXT); CREATE INDEX IF NOT EXISTS idx_invoice_identity ON invoices(identity_key);");
     this.db.exec("CREATE TABLE IF NOT EXISTS print_batches (id TEXT PRIMARY KEY,created_at TEXT DEFAULT (datetime('now','localtime')),printer_name TEXT,status TEXT,word_path TEXT,pdf_path TEXT,error TEXT); CREATE TABLE IF NOT EXISTS print_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT,batch_id TEXT,seq INTEGER,kind TEXT,invoice_id INTEGER,file_path TEXT,title TEXT,state TEXT DEFAULT 'pending',error TEXT,content_hash TEXT,submitted_at TEXT);");
     this.db.exec("CREATE TABLE IF NOT EXISTS daily_expenses (id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,total REAL,items_json TEXT,screenshot_ids_json TEXT,created_at TEXT DEFAULT (datetime('now','localtime')));");
-    this.db.exec('PRAGMA user_version = 3');
+    this.db.exec('PRAGMA user_version = 4');
 
 
   }
@@ -296,8 +296,9 @@ class Store {
     return r.lastInsertRowid;
   }
 
-  listInvoices(where = '', params = []) {
-    return this.db.prepare(`SELECT * FROM invoices ${where} ORDER BY COALESCE(NULLIF(issue_date,''),SUBSTR(mail_received_at,1,10),SUBSTR(created_at,1,10)) DESC, COALESCE(mail_received_at,created_at) DESC,id DESC`).all(...params);
+  listInvoices(where = '', params = [], deleted = false) {
+    const clause=(where?where+' AND ':'WHERE ')+'deleted_at IS '+(deleted?'NOT NULL':'NULL');
+    return this.db.prepare(`SELECT * FROM invoices ${clause} ORDER BY COALESCE(NULLIF(issue_date,''),SUBSTR(mail_received_at,1,10),SUBSTR(created_at,1,10)) DESC, COALESCE(mail_received_at,created_at) DESC,id DESC`).all(...params);
   }
 
   findInvoiceByHash(hash) {

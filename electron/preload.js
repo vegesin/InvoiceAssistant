@@ -44,6 +44,8 @@ contextBridge.exposeInMainWorld('api', {
 
   // 发票
   listInvoices: (where) => ipcRenderer.invoke('invoice:list', where),
+  deleteInvoices: ids => ipcRenderer.invoke('invoice:delete', ids),
+  restoreInvoices: ids => ipcRenderer.invoke('invoice:restore', ids),
   pickInvoices: () => ipcRenderer.invoke('invoice:pick'),
   importInvoices: (paths) => ipcRenderer.invoke('invoice:import', paths),
 

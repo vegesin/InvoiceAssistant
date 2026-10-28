@@ -61,6 +61,7 @@ async function runBatch(store,id,options={}){
   if(store.printing)throw new Error('有批次正在打印');
   const batch=store.db.prepare('SELECT * FROM print_batches WHERE id=?').get(id);if(!batch)throw new Error('打印批次不存在');
   const jobs=store.db.prepare("SELECT * FROM print_jobs WHERE batch_id=? AND state IN ('pending','failed') ORDER BY seq").all(id);
+  if(store.db.prepare('SELECT j.id FROM print_jobs j JOIN invoices i ON i.id=j.invoice_id WHERE j.batch_id=? AND i.deleted_at IS NOT NULL LIMIT 1').get(id))throw new Error('本批次包含已删除发票，请先恢复后再续打');
   if(store.db.prepare("SELECT id FROM print_jobs WHERE batch_id=? AND state IN ('submitting','uncertain')").get(id))throw new Error('有状态不确定的任务，请先查看系统打印队列并在界面确认');
   for(const job of jobs){if(!fs.existsSync(job.file_path)||contentHash(fs.readFileSync(job.file_path))!==job.content_hash)throw new Error('待打印文件已变化，请重新选择生成批次');}
   store.printing=true;

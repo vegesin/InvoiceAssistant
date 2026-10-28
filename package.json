@@ -1,6 +1,6 @@
 {
   "name": "invoice-reimbursement-assistant",
-  "version": "0.4.1",
+  "version": "0.4.3",
   "description": "本地整理发票与付款截图、批量单面打印、日常开销核算的 Windows 便携工具",
   "main": "electron/main.js",
   "private": true,

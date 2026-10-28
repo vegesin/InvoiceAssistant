@@ -10,7 +10,7 @@ A portable Windows desktop app for organizing Chinese invoice PDFs and their pay
 
 Download the Windows x64 Portable EXE from this repository's Releases. The source ZIP does not contain a compiled EXE; if no release is available, build from source.
 
-1. Place the EXE in a writable folder and launch it. New users get a local data folder beside the EXE; existing users keep their configured data location.
+1. Place the EXE in a writable folder and launch it. New users get an InvoiceData folder beside the EXE, located through a relative path; existing users keep their configured data location.
 2. Import PDF/OFD/ZIP invoices and phone payment screenshots, or configure an IMAP mailbox.
 3. Review recognized fields and confirm screenshot matches.
 4. Select a printer and either **invoices only** or **invoices plus payment records**. Both request single-sided printing.
@@ -27,6 +27,7 @@ No separate Node.js, Python, OCR, Word, or PDF printing application is needed fo
 - Landscape A4 payment DOCX and a matching PDF for the built-in print pipeline.
 - A separate daily-expense page: expenses minus refunds, excluding income, with editable transaction rows.
 - Local storage, private mailbox configuration, migration, and persistent print progress.
+- Reversible single or batch invoice deletion, with retained originals and print history; mailbox rescans do not restore deleted invoices.
 
 Windows 10/11 x64 is the supported target. OCR and matching require human review. Each invoice currently pairs with one payment screenshot. OFD text can be imported, but a matching PDF is required for preview and batch printing. Mail that only contains a web download link needs manual downloading first. The app does not provide cloud sync, a mobile app, or enterprise approval workflows.
 

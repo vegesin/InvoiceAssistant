@@ -22,9 +22,10 @@ function tableFor(type) {
   if (type === 'screenshot') return 'screenshots';
   throw new Error('材料类型无效');
 }
-function getMaterial(store, type, materialId) {
+function getMaterial(store, type, materialId, includeDeleted = false) {
   const record = store.db.prepare('SELECT * FROM ' + tableFor(type) + ' WHERE id = ?').get(id(materialId));
   if (!record) throw new Error('材料不存在');
+  if (type === 'invoice' && record.deleted_at && !includeDeleted) throw new Error('发票已删除，请先在“已删除”中恢复');
   return record;
 }
 function assertEditable(store, type, materialId) {
@@ -104,6 +105,7 @@ function listMaterials(store) {
   const decorate = (row, type) => ({ ...row, reports: membership.filter(item => item.item_type === type && item.item_id === row.id) });
   return {
     invoices: store.listInvoices().filter(row=>!row.duplicate_of&&row.document_kind!=='supporting').map(row => ({ ...decorate(row, 'invoice'), screenshot_id: pairs.find(pair => pair.invoice_id === row.id)?.screenshot_id || null })),
+    deletedInvoices: store.listInvoices('',[],true).filter(row=>!row.duplicate_of&&row.document_kind!=='supporting'),
     screenshots: store.listScreenshots().map(row => ({ ...decorate(row, 'screenshot'), invoice_id: pairs.find(pair => pair.screenshot_id === row.id)?.invoice_id || null })),
   };
 }
@@ -144,4 +146,7 @@ function paymentImages(store, invoiceIds) {
     return { invoice, screenshot: shot };
   });
 }
-module.exports = { id, amount, getMaterial, assertEditable, bindPayment, updateMaterial, listMaterials, importInvoices, preview, paymentImages };
+module.exports = { id, amount, getMaterial, assertEditable, bindPayment, updateMaterial, listMaterials, importInvoices, preview, paymentImages,
+  deleteInvoices:(store,ids)=>require('./invoices').deleteInvoices(store,ids),
+  restoreInvoices:(store,ids)=>require('./invoices').restoreInvoices(store,ids),
+};

@@ -23,31 +23,34 @@ function copyVerified(source,target){
   writeJson(path.join(target,'migration.json'),{source:path.resolve(source),target:path.resolve(target),copiedAt:new Date().toISOString()});
 }
 function rewritePaths(store){
-  const marker=path.join(store.dirs.root,'migration.json');if(!fs.existsSync(marker))return;
-  const info=JSON.parse(fs.readFileSync(marker,'utf8'));if(info.rewritten)return;
-  store.db.transaction(()=>{
+  const marker=path.join(store.dirs.root,'migration.json');
+  const info=fs.existsSync(marker)?JSON.parse(fs.readFileSync(marker,'utf8')):null;
+  const location=path.join(store.dirs.config,'storage.private.json');
+  const previous=fs.existsSync(location)?JSON.parse(fs.readFileSync(location,'utf8')).lastDataRoot:null;
+  const source=info&&!info.rewritten?info.source:previous;
+  if(source&&path.resolve(source)!==store.dirs.root)store.db.transaction(()=>{
     for(const [table,fields]of [['invoices',['file_path','thumbnail_path']],['screenshots',['file_path','thumbnail_path']],['invoice_variants',['file_path']],['reimbursement',['word_path','exported_path']],['print_batches',['word_path','pdf_path']],['print_jobs',['file_path']]]){
       for(const row of store.db.prepare('SELECT * FROM '+table).all())for(const field of fields){
-        if(row[field]&&inside(row[field],info.source))store.db.prepare('UPDATE '+table+' SET '+field+'=? WHERE id=?').run(path.join(info.target,path.relative(info.source,row[field])),row.id);
+        if(row[field]&&inside(row[field],source))store.db.prepare('UPDATE '+table+' SET '+field+'=? WHERE id=?').run(path.join(store.dirs.root,path.relative(source,row[field])),row.id);
       }
     }
   });
-  writeJson(marker,{...info,rewritten:true});
+  if(info&&!info.rewritten)writeJson(marker,{...info,target:store.dirs.root,rewritten:true});
+  if(previous!==store.dirs.root)writeJson(location,{lastDataRoot:store.dirs.root});
 }
 async function chooseInitial(dialog){
-  const previous=paths.preference();let root=process.env.INVOICE_ASSISTANT_DATA_DIR||previous.dataRoot;
+  const previous=paths.preference();let root=process.env.INVOICE_ASSISTANT_DATA_DIR?paths.DATA_ROOT:paths.resolveDataRoot(previous.dataRoot);
   const firstLaunchDate=previous.firstLaunchDate||localDate();
-  if(!root){
-    root=path.join(paths.LAUNCHER_ROOT,'报销资料');
+  if(!process.env.INVOICE_ASSISTANT_DATA_DIR&&!previous.dataRoot){
     try{fs.mkdirSync(root,{recursive:true});}
     catch(error){
       const picked=await dialog.showOpenDialog({title:'默认目录不可写，请选择报销资料保存位置',defaultPath:fs.existsSync('D:\\')?'D:\\':paths.LAUNCHER_ROOT,properties:['openDirectory','createDirectory']});
       if(picked.canceled)return null;
-      root=path.join(picked.filePaths[0],'报销资料');
+      root=path.join(picked.filePaths[0],'InvoiceData');
     }
   }
   root=path.resolve(root);paths.setRoot(root);
-  if(!process.env.INVOICE_ASSISTANT_DATA_DIR)writeJson(paths.PREFERENCE_FILE,{dataRoot:root,firstLaunchDate});
+  if(!process.env.INVOICE_ASSISTANT_DATA_DIR)writeJson(paths.PREFERENCE_FILE,{dataRoot:paths.storedDataRoot(root),firstLaunchDate});
   if(!process.env.INVOICE_ASSISTANT_DATA_DIR&&!fs.existsSync(path.join(root,'db','app.db'))&&fs.existsSync(path.join(paths.LEGACY_ROOT,'db','app.db'))){
     const answer=await dialog.showMessageBox({type:'question',title:'发现旧版资料',message:'是否把旧版资料复制到所选目录？',detail:'会校验复制结果并保留旧版原文件。邮箱私人配置一并迁移。',buttons:['复制旧资料','使用空白资料库'],defaultId:0,cancelId:1});
     if(answer.response===0)copyVerified(paths.LEGACY_ROOT,root);

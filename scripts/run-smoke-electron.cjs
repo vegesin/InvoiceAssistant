@@ -59,7 +59,7 @@ async function launch(executable,dataRoot,development){
   };
   const tab=async label=>{await run('Array.from(document.querySelectorAll("nav button")).find(button=>button.textContent==='+JSON.stringify(label)+').click()');await delay(120);};
   const set=async(selector,value)=>{await run('(()=>{const element=document.querySelector('+JSON.stringify(selector)+');if(!element)throw new Error("输入不存在");Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element),"value").set.call(element,'+JSON.stringify(value)+');element.dispatchEvent(new Event(element.tagName==="SELECT"?"change":"input",{bubbles:true}));})()');await delay(60);};
-  const capture=async file=>{const result=await request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(file,Buffer.from(result.data,'base64'));};
+  const capture=async file=>{if(process.env.INVOICE_SMOKE_CAPTURE==='0')return;const result=await request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(file,Buffer.from(result.data,'base64'));};
   const close=async()=>{try{await Promise.race([run('window.close()'),delay(500)]);}catch(_){}socket.close();await delay(400);if(child.exitCode===null)await Promise.race([new Promise(resolve=>child.once('exit',resolve)),delay(2000)]);if(child.exitCode===null)child.kill();};
   return {run,waitFor,click,tab,set,capture,close,request};
 }
@@ -116,10 +116,24 @@ async function launch(executable,dataRoot,development){
   assert.equal((await app.run('window.api.printBatches()')).length,2);
   assert.equal((await app.run('window.api.listDaily()'))[0].total,18.5);
   assert.ok((await app.run('window.api.importScreenshots('+JSON.stringify(input.payments)+',"payment")')).every(s=>s.duplicate));
+  await app.tab('发票报销');
+  await app.run('document.querySelector(".invoice-card [data-action=delete]").click()');
+  await app.waitFor('document.querySelector("[role=dialog][aria-label=删除发票]")!==null');await app.click('取消');
+  assert.equal((await app.run('window.api.listMaterials()')).invoices.length,3);
+  await app.run('document.querySelector(".invoice-card [data-action=delete]").click()');await app.click('确认删除');
+  await app.waitFor('document.querySelectorAll(".invoice-card").length===2');
+  let removed=await app.run('window.api.listMaterials()');assert.equal(removed.deletedInvoices.length,1);assert.equal(removed.screenshots.filter(s=>s.purpose==='payment'&&!s.invoice_id).length,1);
+  await app.click('已删除');await app.waitFor('document.querySelectorAll(".deleted-invoice").length===1');await app.click('恢复');await app.waitFor('document.querySelectorAll(".deleted-invoice").length===0');
+  await app.click('全部发票');await app.waitFor('document.querySelectorAll(".invoice-card").length===3');
+  await app.set('select[aria-label=打印模式]','invoices');
+  await app.run('document.querySelectorAll(".invoice-card input[type=checkbox]").forEach((box,i)=>{if(i<2&&!box.checked)box.click();if(i>=2&&box.checked)box.click();})');
+  await app.click('删除所选');await app.click('确认删除');await app.waitFor('document.querySelectorAll(".invoice-card").length===1');
+  removed=await app.run('window.api.listMaterials()');assert.equal(removed.deletedInvoices.length,2);assert.equal(removed.screenshots.filter(s=>s.purpose==='payment'&&!s.invoice_id).length,2);
+  await app.click('已删除');await app.capture(path.join(qa,packaged?'packaged-deleted.png':'desktop-deleted.png'));
   assert.deepEqual(await app.run('window.__errors'),[]);
-  fs.writeFileSync(path.join(qa,packaged?'packaged-smoke-result.json':'desktop-smoke-result.json'),JSON.stringify({passed:true,version:require('../package.json').version,packaged,executable,dataRoot,batchId,wordPath:printed.word_path,pdfPath:printed.pdf_path,tasks:7,invoiceOnly:true,cardFileDrop:true,galleryFileDrop:true,ocr:true,externalFileDrop:true,thumbnailDragPair:true,simplex:true},null,2));
+  fs.writeFileSync(path.join(qa,packaged?'packaged-smoke-result.json':'desktop-smoke-result.json'),JSON.stringify({passed:true,version:require('../package.json').version,packaged,executable,dataRoot,batchId,wordPath:printed.word_path,pdfPath:printed.pdf_path,tasks:7,invoiceOnly:true,cardFileDrop:true,galleryFileDrop:true,ocr:true,externalFileDrop:true,thumbnailDragPair:true,simplex:true,deletion:true,restore:true,batchDeletion:true},null,2));
   console.log('PASS: 两个选项卡、内置OCR、真实文件拖入、截图拖动关联、日期配置、N+1单面打印任务、日常开销合计');
  }catch(error){try{console.error('界面状态：',await app.run('document.body.textContent.slice(-1800)'));await app.capture(path.join(qa,'smoke-failure.png'));}catch(_){}throw error;}finally{await app.close();}
  app=await launch(executable,dataRoot,!packaged);
- try{await app.waitFor('!!window.api&&!!document.querySelector(".panel")');assert.equal((await app.run('window.api.getSettings()')).mailReceivedFrom,'2025-01-01');assert.equal((await app.run('window.api.listMaterials()')).invoices.length,3);assert.equal((await app.run('window.api.printBatches()'))[0].status,'submitted');assert.equal((await app.run('window.api.listDaily()')).length,1);console.log('PASS: 重启后日期配置、配对、打印进度和日常核算保留');}finally{await app.close();}
+ try{await app.waitFor('!!window.api&&!!document.querySelector(".panel")');assert.equal((await app.run('window.api.getSettings()')).mailReceivedFrom,'2025-01-01');assert.equal((await app.run('window.api.listMaterials()')).invoices.length,1);assert.equal((await app.run('window.api.listMaterials()')).deletedInvoices.length,2);assert.equal((await app.run('window.api.printBatches()'))[0].status,'submitted');assert.equal((await app.run('window.api.listDaily()')).length,1);console.log('PASS: 重启后日期配置、删除状态、打印进度和日常核算保留');}finally{await app.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});
