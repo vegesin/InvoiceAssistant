@@ -28,7 +28,7 @@ No separate Node.js, Python, OCR, Word, or PDF printing application is needed fo
 - A separate daily-expense page: expenses minus refunds, excluding income, with editable transaction rows.
 - Local storage, private mailbox configuration, migration, and persistent print progress.
 
-Windows 10/11 x64 is the supported target. OCR and matching require human review. Each invoice currently pairs with one payment screenshot. OFD text can be imported, but a matching PDF is required for preview and batch printing. Mail that only contains a web download link needs manual downloading first. The app does not read WeChat databases or provide cloud sync, a mobile app, or enterprise approval workflows.
+Windows 10/11 x64 is the supported target. OCR and matching require human review. Each invoice currently pairs with one payment screenshot. OFD text can be imported, but a matching PDF is required for preview and batch printing. Mail that only contains a web download link needs manual downloading first. The app does not provide cloud sync, a mobile app, or enterprise approval workflows.
 
 ## Build
 
